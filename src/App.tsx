@@ -3,12 +3,14 @@ import { OrbitControls } from '@react-three/drei'
 import GameScene from './components/3d/GameScene'
 import UIOverlay from './components/ui/UIOverlay'
 import { GameProvider } from './context/GameContext'
+import { SettingsProvider } from './context/SettingsContext'
 import './App.css'
 
 function App() {
   return (
-    <GameProvider>
-      <div className="app-container">
+    <SettingsProvider>
+      <GameProvider>
+        <div className="app-container">
         <Canvas
           camera={{ position: [5, 5, 5], fov: 50 }}
           gl={{ antialias: true }}
@@ -26,7 +28,8 @@ function App() {
         </Canvas>
         <UIOverlay />
       </div>
-    </GameProvider>
+      </GameProvider>
+    </SettingsProvider>
   )
 }
 

@@ -1,17 +1,22 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
+import { useSettings } from '../../context/SettingsContext'
+import { MODE_CONFIGS } from '../../types/game'
 
 interface PieceProps {
-  type: 'X' | 'O'
+  playerId: 1 | 2
   position: [number, number, number]
   isWinning?: boolean
   isPreview?: boolean
 }
 
-export default function Piece({ type, position, isWinning = false, isPreview = false }: PieceProps) {
+export default function Piece({ playerId, position, isWinning = false, isPreview = false }: PieceProps) {
   const groupRef = useRef<THREE.Group>(null)
   const initialY = position[1]
+  const { gameMode } = useSettings()
+  const config = MODE_CONFIGS[gameMode]
+  const player = playerId === 1 ? config.player1 : config.player2
 
   // Animation: piece drops from above (skip for preview)
   useFrame((state) => {
@@ -39,17 +44,23 @@ export default function Piece({ type, position, isWinning = false, isPreview = f
   })
 
   const getColor = () => {
-    if (isWinning) return "#178e17";
-    if (isPreview) return type === 'X' ? '#4ecdc4' : '#ffe66d'
-    return type === 'X' ? '#4ecdc4' : '#ffe66d'
+    if (isWinning) return '#178e17'
+    return player.color
   }
 
   return (
     <group ref={groupRef} position={[position[0], position[1] + (isPreview ? 0.3 : 2), position[2]]}>
-      {type === 'X' ? (
+      {player.shape === 'x' && (
         <XPiece color={getColor()} opacity={isPreview ? 0.5 : 1} />
-      ) : (
+      )}
+      {player.shape === 'o' && (
         <OPiece color={getColor()} opacity={isPreview ? 0.5 : 1} />
+      )}
+      {player.shape === 'sphere' && (
+        <SpherePiece color={getColor()} opacity={isPreview ? 0.5 : 1} />
+      )}
+      {player.shape === 'cube' && (
+        <CubePiece color={getColor()} opacity={isPreview ? 0.5 : 1} />
       )}
     </group>
   )
@@ -95,6 +106,40 @@ function OPiece({ color, opacity = 1 }: { color: string; opacity?: number }) {
   return (
     <mesh>
       <torusGeometry args={[0.3, 0.1, 16, 32]} />
+      <meshStandardMaterial
+        color={color}
+        metalness={0.1}
+        roughness={0.6}
+        transparent
+        opacity={opacity}
+        emissive={color}
+        emissiveIntensity={0.3}
+      />
+    </mesh>
+  )
+}
+
+function SpherePiece({ color, opacity = 1 }: { color: string; opacity?: number }) {
+  return (
+    <mesh>
+      <sphereGeometry args={[0.3, 32, 32]} />
+      <meshStandardMaterial
+        color={color}
+        metalness={0.1}
+        roughness={0.6}
+        transparent
+        opacity={opacity}
+        emissive={color}
+        emissiveIntensity={0.3}
+      />
+    </mesh>
+  )
+}
+
+function CubePiece({ color, opacity = 1 }: { color: string; opacity?: number }) {
+  return (
+    <mesh>
+      <boxGeometry args={[0.5, 0.5, 0.5]} />
       <meshStandardMaterial
         color={color}
         metalness={0.1}

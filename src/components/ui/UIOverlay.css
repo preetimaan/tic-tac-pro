@@ -30,6 +30,83 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
+.avatar-selector {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.avatar-selector label {
+  display: block;
+  color: #aaa;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.avatar-options {
+  display: flex;
+  gap: 8px;
+}
+
+.avatar-button {
+  flex: 1;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.avatar-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.avatar-button.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.avatar-button.disabled,
+.avatar-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.avatar-button.disabled:hover,
+.avatar-button:disabled:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.avatar-lock-message {
+  color: #ffaa44;
+  font-size: 11px;
+  margin-bottom: 8px;
+  font-style: italic;
+}
+
+.game-mode-indicator {
+  margin-top: 8px;
+  color: #aaa;
+  font-size: 11px;
+  text-align: center;
+}
+
+.game-mode-indicator .mode-name {
+  color: #fff;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
 .scores {
   display: flex;
   justify-content: space-around;
