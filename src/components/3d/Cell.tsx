@@ -1,5 +1,8 @@
 import { useRef } from 'react'
 import { useGame } from '../../context/GameContext'
+import { useSettings } from '../../context/SettingsContext'
+import { StackedPiece } from '../../types/game'
+import { canPlacePiece } from '../../utils/gameLogicStacked'
 import * as THREE from 'three'
 
 interface CellProps {
@@ -11,17 +14,39 @@ interface CellProps {
 export default function Cell({ index, position, onHover }: CellProps) {
   const meshRef = useRef<THREE.Mesh>(null)
   const { state, makeMove } = useGame()
+  const { gameMode } = useSettings()
+
+  const canPlace = () => {
+    if (state.status !== 'playing') return false
+    
+    if (gameMode === 'stacked') {
+      if (!state.selectedPieceSize || !state.remainingPieces) return false
+      
+      const board = state.board as StackedPiece[][]
+      const playerPieces = state.remainingPieces[state.currentPlayer]
+      
+      // Check if player has pieces of selected size
+      if (playerPieces[state.selectedPieceSize] === 0) return false
+      
+      // Check if can place piece on this cell
+      return canPlacePiece(board, index, state.selectedPieceSize)
+    } else {
+      // Regular and 3D modes
+      const board = state.board as any[]
+      return board[index] === null
+    }
+  }
 
   const handleClick = (event: any) => {
     event.stopPropagation()
-    if (state.status === 'playing' && state.board[index] === null) {
+    if (canPlace()) {
       makeMove(index)
     }
   }
 
   const handlePointerOver = (event: any) => {
     event.stopPropagation()
-    if (state.status === 'playing' && state.board[index] === null) {
+    if (canPlace()) {
       onHover(true)
     }
   }
@@ -30,7 +55,7 @@ export default function Cell({ index, position, onHover }: CellProps) {
     onHover(false)
   }
 
-  const isHoverable = state.status === 'playing' && state.board[index] === null
+  const isHoverable = canPlace()
 
   return (
     <mesh

@@ -54,29 +54,33 @@ export default function Board3D() {
       </mesh>
 
       {/* Cells */}
-      {cells.map(({ index, position }) => (
-        <group key={index}>
-          <Cell
-            index={index}
-            position={position}
-            onHover={(hovered) => setHoveredCell(hovered ? index : null)}
-          />
-          {state.board[index] && (
-            <Piece
-              playerId={state.board[index]!}
+      {cells.map(({ index, position }) => {
+        const board = state.board as (1 | 2 | null)[]
+        const cellValue = board[index]
+        return (
+          <group key={index}>
+            <Cell
+              index={index}
               position={position}
-              isWinning={state.winningLine?.includes(index) ?? false}
+              onHover={(hovered) => setHoveredCell(hovered ? index : null)}
             />
-          )}
-          {hoveredCell === index && !state.board[index] && state.status === 'playing' && (
-            <Piece
-              playerId={state.currentPlayer}
-              position={position}
-              isPreview={true}
-            />
-          )}
-        </group>
-      ))}
+            {cellValue && (
+              <Piece
+                playerId={cellValue}
+                position={position}
+                isWinning={state.winningLine?.includes(index) ?? false}
+              />
+            )}
+            {hoveredCell === index && !cellValue && state.status === 'playing' && (
+              <Piece
+                playerId={state.currentPlayer}
+                position={position}
+                isPreview={true}
+              />
+            )}
+          </group>
+        )
+      })}
     </group>
   )
 }

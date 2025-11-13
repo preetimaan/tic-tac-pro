@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useGame } from '../../context/GameContext'
 import { useSettings } from '../../context/SettingsContext'
-import { MODE_CONFIGS, GameMode } from '../../types/game'
+import { MODE_CONFIGS, GameMode, StackedPiece } from '../../types/game'
 import RulesModal from './RulesModal'
+import PieceSelectorModal from './PieceSelectorModal'
 import './UIOverlay.css'
 
 export default function UIOverlay() {
@@ -11,7 +12,9 @@ export default function UIOverlay() {
   const config = MODE_CONFIGS[gameMode]
   const [showRules, setShowRules] = useState(false)
   // Allow switching if no pieces have been placed yet
-  const hasPiecesPlaced = state.board.some(cell => cell !== null)
+  const hasPiecesPlaced = gameMode === 'stacked'
+    ? Array.isArray(state.board) && (state.board as StackedPiece[][]).some(stack => Array.isArray(stack) && stack.length > 0)
+    : Array.isArray(state.board) && (state.board as any[]).some(cell => cell !== null)
   const isGameActive = state.status === 'playing' && hasPiecesPlaced
 
   const getStatusMessage = () => {
@@ -71,6 +74,14 @@ export default function UIOverlay() {
             >
               3D
             </button>
+            <button
+              className={`avatar-button ${gameMode === 'stacked' ? 'active' : ''} ${isGameActive ? 'disabled' : ''}`}
+              onClick={() => handleModeChange('stacked')}
+              disabled={isGameActive}
+              title={isGameActive ? 'Finish or reset current game to switch' : 'Stacked Tic-Tac-Toe (Red & Blue)'}
+            >
+              Stacked
+            </button>
           </div>
           <div className="game-mode-indicator">
             Players: <span className="mode-name">{config.player1.name} & {config.player2.name}</span>
@@ -103,6 +114,7 @@ export default function UIOverlay() {
         </div>
       </div>
       <RulesModal isOpen={showRules} onClose={() => setShowRules(false)} />
+      <PieceSelectorModal />
     </>
   )
 }

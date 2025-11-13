@@ -1,15 +1,27 @@
 export type PlayerId = 1 | 2 | null
 export type GameStatus = 'playing' | 'won' | 'draw'
-export type GameMode = 'regular' | '3d'
+export type GameMode = 'regular' | '3d' | 'stacked'
+export type PieceSize = 'small' | 'medium' | 'large'
+
+export interface StackedPiece {
+  playerId: 1 | 2
+  size: PieceSize
+}
 
 export interface GameState {
-  board: PlayerId[]
+  board: PlayerId[] | StackedPiece[][]
   currentPlayer: 1 | 2
   status: GameStatus
   winner: PlayerId
   winningLine: number[] | null
   scores: { 1: number; 2: number }
   mode: GameMode
+  // Stacked mode specific
+  selectedPieceSize?: PieceSize
+  remainingPieces?: {
+    1: { small: number; medium: number; large: number }
+    2: { small: number; medium: number; large: number }
+  }
 }
 
 export interface Position {
@@ -21,7 +33,7 @@ export interface Position {
 export interface PlayerConfig {
   name: string
   color: string
-  shape: 'x' | 'o' | 'sphere' | 'cube'
+  shape: 'x' | 'o' | 'sphere' | 'cube' | 'stacked'
 }
 
 export interface ModeConfig {
@@ -59,5 +71,19 @@ export const MODE_CONFIGS: Record<GameMode, ModeConfig> = {
       shape: 'cube',
     },
     boardSize: 27,
+  },
+  stacked: {
+    mode: 'stacked',
+    player1: {
+      name: 'Blue',
+      color: '#4488ff',
+      shape: 'stacked',
+    },
+    player2: {
+      name: 'Pink',
+      color: '#ff69b4',
+      shape: 'stacked',
+    },
+    boardSize: 9,
   },
 }

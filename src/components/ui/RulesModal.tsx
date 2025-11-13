@@ -67,6 +67,26 @@ export default function RulesModal({ isOpen, onClose }: RulesModalProps) {
           </div>
 
           <div className="rules-section">
+            <h3>Stacked Mode (Blue & Pink)</h3>
+            <ul>
+              <li>3×3 Tic-Tac-Toe with stackable pieces of different sizes</li>
+              <li>Each player has 9 pieces: 3 small, 3 medium, 3 large</li>
+              <li>Pieces can be placed on:
+                <ul>
+                  <li>Empty cells</li>
+                  <li>Cells occupied by smaller pieces (stacking)</li>
+                </ul>
+              </li>
+              <li>Only larger pieces can be placed on smaller pieces (from either player)</li>
+              <li>Stacking keeps both pieces in place, but only the top piece counts for wins</li>
+              <li>First player to get 3 top pieces in a row wins</li>
+              <li>If all pieces are placed with no winner, it's a draw</li>
+              <li>Starting player is randomized each game</li>
+              <li><strong>Winning Lines:</strong> 8 possible (3 rows, 3 columns, 2 diagonals) - only top pieces count</li>
+            </ul>
+          </div>
+
+          <div className="rules-section">
             <h3>Controls</h3>
             <ul>
               <li><strong>Click</strong> on a cell to place your piece</li>

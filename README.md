@@ -39,6 +39,35 @@ Classic 3×3 Tic-Tac-Toe with X and O pieces.
 
 ---
 
+### Stacked Mode (Blue & Pink)
+
+3×3 Tic-Tac-Toe with stackable pieces of different sizes.
+
+**Rules:**
+- Each player has 9 pieces: 3 small, 3 medium, 3 large
+- Players take turns placing pieces on a 3×3 grid
+- Pieces can be placed on:
+  - Empty cells
+  - Cells occupied by smaller pieces (stacking)
+- Only larger pieces can be placed on smaller pieces (from either player)
+- Stacking keeps both pieces in place, but only the top piece counts for wins
+- First player to get 3 top pieces in a row (horizontal, vertical, or diagonal) wins
+- If all pieces are placed with no winner, it's a draw
+- Starting player is randomized each game
+
+**Piece Sizes:**
+- Small pieces (3 per player)
+- Medium pieces (3 per player)
+- Large pieces (3 per player)
+
+**Visual Design:**
+- Pieces are designed like nested dolls with cylindrical bodies and semi-sphere tops
+- Stacked pieces show size progression visually
+
+**Winning Lines:** 8 possible (3 rows, 3 columns, 2 diagonals) - only top pieces count
+
+---
+
 ## Controls
 
 - **Click** on a cell to place your piece

@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import Board from './Board'
 import Board3D from './Board3D'
+import BoardStacked from './BoardStacked'
 import { useSettings } from '../../context/SettingsContext'
 
 export default function GameScene() {
@@ -17,7 +18,13 @@ export default function GameScene() {
 
   return (
     <group ref={groupRef}>
-      {gameMode === '3d' ? <Board3D /> : <Board />}
+      {gameMode === '3d' ? (
+        <Board3D />
+      ) : gameMode === 'stacked' ? (
+        <BoardStacked />
+      ) : (
+        <Board />
+      )}
     </group>
   )
 }

@@ -182,7 +182,7 @@
 }
 
 .status.won {
-  color: #ff6b6b;
+  color: #178e17;
   animation: pulse 1s ease-in-out infinite;
 }
 
@@ -233,5 +233,159 @@
   font-size: 12px;
   margin: 4px 0;
   line-height: 1.5;
+}
+
+.piece-selector {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.piece-selector label {
+  display: block;
+  color: #aaa;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.piece-size-options {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.piece-size-button {
+  flex: 1;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.piece-size-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.piece-size-button.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.piece-size-button.disabled,
+.piece-size-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.piece-size-button.disabled:hover,
+.piece-size-button:disabled:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.piece-size-label {
+  font-weight: 600;
+}
+
+.piece-size-count {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+.remaining-pieces {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.remaining-pieces-label {
+  color: #aaa;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.remaining-pieces-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.remaining-pieces-player {
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.remaining-pieces-player.current {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.remaining-pieces-player-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.remaining-pieces-player-name {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.remaining-pieces-turn-indicator {
+  font-size: 10px;
+  color: #4ecdc4;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+.remaining-pieces-sizes {
+  display: flex;
+  gap: 12px;
+  justify-content: space-around;
+}
+
+.remaining-pieces-size-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.remaining-pieces-size-label {
+  font-size: 10px;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+.remaining-pieces-size-count {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
 }
 
