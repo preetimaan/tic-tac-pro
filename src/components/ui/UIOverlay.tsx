@@ -1,12 +1,15 @@
+import { useState } from 'react'
 import { useGame } from '../../context/GameContext'
 import { useSettings } from '../../context/SettingsContext'
 import { MODE_CONFIGS, GameMode } from '../../types/game'
+import RulesModal from './RulesModal'
 import './UIOverlay.css'
 
 export default function UIOverlay() {
   const { state, resetGame } = useGame()
   const { gameMode, setGameMode } = useSettings()
   const config = MODE_CONFIGS[gameMode]
+  const [showRules, setShowRules] = useState(false)
   // Allow switching if no pieces have been placed yet
   const hasPiecesPlaced = state.board.some(cell => cell !== null)
   const isGameActive = state.status === 'playing' && hasPiecesPlaced
@@ -34,9 +37,15 @@ export default function UIOverlay() {
   }
 
   return (
-    <div className="ui-overlay">
-      <div className="ui-panel">
-        <h1 className="title">3D Tic-Tac-Toe</h1>
+    <>
+      <div className="ui-overlay">
+        <div className="ui-panel">
+          <div className="title-section">
+            <h1 className="title">3D Tic-Tac-Toe</h1>
+            <button className="rules-button" onClick={() => setShowRules(true)} title="View Game Rules">
+              ?
+            </button>
+          </div>
         
         <div className="avatar-selector">
           <label>Game Mode:</label>
@@ -91,7 +100,9 @@ export default function UIOverlay() {
           <p>Click on a cell to place your piece</p>
           <p>Rotate: Click + Drag | Zoom: Scroll</p>
         </div>
+        </div>
       </div>
-    </div>
+      <RulesModal isOpen={showRules} onClose={() => setShowRules(false)} />
+    </>
   )
 }
