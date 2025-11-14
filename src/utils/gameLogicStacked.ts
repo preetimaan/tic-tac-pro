@@ -1,4 +1,4 @@
-import { StackedPiece, PlayerId, GameStatus } from '../types/game'
+import { StackedPiece, PlayerId, GameStatus, PieceSize } from '../types/game'
 
 const SIZE_ORDER: Record<'small' | 'medium' | 'large', number> = {
   small: 1,
@@ -103,7 +103,28 @@ export function checkWinner(board: StackedPiece[][]): {
 }
 
 /**
- * Check for draw - all pieces placed and no winner
+ * Check if a player has any valid moves available
+ */
+function hasValidMoves(
+  board: StackedPiece[][],
+  playerPieces: { small: number; medium: number; large: number }
+): boolean {
+  // Check each cell to see if any available piece can be placed
+  for (let cellIndex = 0; cellIndex < board.length; cellIndex++) {
+    // Check each piece size the player has
+    for (const [size, count] of Object.entries(playerPieces) as [PieceSize, number][]) {
+      if (count > 0 && canPlacePiece(board, cellIndex, size)) {
+        return true
+      }
+    }
+  }
+  return false
+}
+
+/**
+ * Check for draw - occurs when:
+ * 1. All pieces are placed and no winner, OR
+ * 2. Both players have no valid moves (stalemate)
  */
 export function checkDraw(
   board: StackedPiece[][],
@@ -112,7 +133,12 @@ export function checkDraw(
     2: { small: number; medium: number; large: number }
   }
 ): boolean {
-  // Check if all pieces are used
+  // First check if there's a winner
+  if (checkWinner(board).winner !== null) {
+    return false
+  }
+  
+  // Scenario 1: All pieces are used
   const allPiecesUsed =
     remainingPieces[1].small === 0 &&
     remainingPieces[1].medium === 0 &&
@@ -121,7 +147,19 @@ export function checkDraw(
     remainingPieces[2].medium === 0 &&
     remainingPieces[2].large === 0
   
-  return allPiecesUsed && checkWinner(board).winner === null
+  if (allPiecesUsed) {
+    return true
+  }
+  
+  // Scenario 2: Stalemate - both players have no valid moves
+  const player1HasMoves = hasValidMoves(board, remainingPieces[1])
+  const player2HasMoves = hasValidMoves(board, remainingPieces[2])
+  
+  if (!player1HasMoves && !player2HasMoves) {
+    return true
+  }
+  
+  return false
 }
 
 export function getGameStatus(
