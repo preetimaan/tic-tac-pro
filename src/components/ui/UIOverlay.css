@@ -529,3 +529,113 @@
     display: none;
   }
 }
+
+/* Game Over Overlay */
+.game-over-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  pointer-events: auto;
+  cursor: pointer;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.game-over-content {
+  background: rgba(20, 20, 20, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 48px 64px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game-over-title {
+  color: #fff;
+  font-size: 36px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.game-over-subtitle {
+  color: #aaa;
+  font-size: 16px;
+  margin: 0;
+  font-weight: 500;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Responsive Design for Game Over Overlay */
+@media (max-width: 768px) {
+  .game-over-content {
+    padding: 32px 40px;
+    border-radius: 16px;
+  }
+
+  .game-over-title {
+    font-size: 28px;
+    margin-bottom: 12px;
+  }
+
+  .game-over-subtitle {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .game-over-content {
+    padding: 24px 32px;
+    border-radius: 12px;
+    margin: 20px;
+  }
+
+  .game-over-title {
+    font-size: 22px;
+    margin-bottom: 10px;
+  }
+
+  .game-over-subtitle {
+    font-size: 12px;
+  }
+}

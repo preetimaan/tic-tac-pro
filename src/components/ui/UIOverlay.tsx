@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useGame } from '../../context/GameContext'
 import { useSettings } from '../../context/SettingsContext'
 import { MODE_CONFIGS, GameMode, StackedPiece } from '../../types/game'
@@ -11,11 +11,33 @@ export default function UIOverlay() {
   const { gameMode, setGameMode } = useSettings()
   const config = MODE_CONFIGS[gameMode]
   const [showRules, setShowRules] = useState(false)
+  const [countdown, setCountdown] = useState(30)
   // Allow switching if no pieces have been placed yet
   const hasPiecesPlaced = gameMode === 'stacked'
     ? Array.isArray(state.board) && (state.board as StackedPiece[][]).some(stack => Array.isArray(stack) && stack.length > 0)
     : Array.isArray(state.board) && (state.board as any[]).some(cell => cell !== null)
   const isGameActive = state.status === 'playing' && hasPiecesPlaced
+  const showGameOverlay = state.status === 'won' || state.status === 'draw'
+
+  // Countdown timer for auto-reset
+  useEffect(() => {
+    if (showGameOverlay) {
+      setCountdown(30)
+      const interval = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+
+      return () => clearInterval(interval)
+    } else {
+      setCountdown(30)
+    }
+  }, [showGameOverlay])
 
   const getStatusMessage = () => {
     if (state.status === 'won') {
@@ -39,8 +61,34 @@ export default function UIOverlay() {
     }
   }
 
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Only reset if clicking the overlay itself, not the content
+    if (e.target === e.currentTarget) {
+      resetGame()
+    }
+  }
+
+  const handleContentClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Prevent clicks on content from closing the modal
+    e.stopPropagation()
+  }
+
   return (
     <>
+      {showGameOverlay && (
+        <div className="game-over-overlay" onClick={handleOverlayClick}>
+          <div className="game-over-content" onClick={handleContentClick}>
+            <h2 className="game-over-title">
+              {state.status === 'won' 
+                ? `${state.winner === 1 ? config.player1.name : config.player2.name} Wins!`
+                : "It's a Draw!"}
+            </h2>
+            <p className="game-over-subtitle">
+              Game will reset in {countdown} seconds
+            </p>
+          </div>
+        </div>
+      )}
       <div className="ui-overlay">
         <div className="ui-panel">
           <div className="title-section">

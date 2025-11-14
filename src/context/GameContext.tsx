@@ -214,6 +214,19 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state.status, state.winner])
 
+  // Auto-reset game 30 seconds after win or draw
+  React.useEffect(() => {
+    if (state.status === 'won' || state.status === 'draw') {
+      const timer = setTimeout(() => {
+        handleResetGame()
+      }, 30000) // 30 seconds
+
+      return () => {
+        clearTimeout(timer)
+      }
+    }
+  }, [state.status, handleResetGame])
+
   return (
     <GameContext.Provider
       value={{
