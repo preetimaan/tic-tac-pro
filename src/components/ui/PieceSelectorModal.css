@@ -69,7 +69,7 @@
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -82,7 +82,6 @@
 .piece-size-button:hover:not(:disabled):not(.active) {
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.3);
-  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .piece-size-button.active {
@@ -98,15 +97,15 @@
   box-shadow: 0 2px 12px rgba(102, 126, 234, 0.4);
 }
 
-.piece-size-button.disabled,
-.piece-size-button:disabled {
+.piece-size-button.disabled:not(.active),
+.piece-size-button:disabled:not(.active) {
   opacity: 0.4;
   cursor: not-allowed;
   background: rgba(255, 255, 255, 0.05);
 }
 
-.piece-size-button.disabled:hover,
-.piece-size-button:disabled:hover {
+.piece-size-button.disabled:hover:not(.active),
+.piece-size-button:disabled:hover:not(.active) {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.2);
 }
@@ -120,3 +119,78 @@
   opacity: 0.8;
 }
 
+/* Responsive Design */
+@media (max-width: 768px) {
+  .piece-selector-modal {
+    top: 10px;
+    bottom: auto;
+    left: 10px;
+    right: 10px;
+    transform: none;
+  }
+
+  .piece-selector-modal-content {
+    flex-direction: column;
+    gap: 12px;
+    padding: 10px 14px;
+    min-width: auto;
+    max-width: none;
+    width: 100%;
+  }
+
+  .piece-selector-player-name {
+    font-size: 13px;
+  }
+
+  .piece-selector-label {
+    font-size: 10px;
+  }
+
+  .piece-size-button {
+    min-width: 70px;
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .piece-selector-modal {
+    top: 5px;
+    bottom: auto;
+    left: 5px;
+    right: 5px;
+  }
+
+  .piece-selector-modal-content {
+    padding: 8px 10px;
+    gap: 10px;
+    border-radius: 8px;
+  }
+
+  .piece-selector-section {
+    gap: 8px;
+  }
+
+  .piece-selector-player-name {
+    font-size: 12px;
+  }
+
+  .piece-selector-label {
+    font-size: 9px;
+  }
+
+  .piece-size-options {
+    gap: 6px;
+  }
+
+  .piece-size-button {
+    min-width: 60px;
+    padding: 6px 8px;
+    font-size: 10px;
+    gap: 2px;
+  }
+
+  .piece-size-count {
+    font-size: 9px;
+  }
+}

@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import GameScene from './components/3d/GameScene'
@@ -7,12 +8,26 @@ import { SettingsProvider } from './context/SettingsContext'
 import './App.css'
 
 function App() {
+  const [fov, setFov] = useState(50)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const updateResponsive = () => {
+      const mobile = window.innerWidth < 768
+      setIsMobile(mobile)
+      setFov(mobile ? 60 : 50)
+    }
+    updateResponsive()
+    window.addEventListener('resize', updateResponsive)
+    return () => window.removeEventListener('resize', updateResponsive)
+  }, [])
+
   return (
     <SettingsProvider>
       <GameProvider>
         <div className="app-container">
         <Canvas
-          camera={{ position: [5, 5, 5], fov: 50 }}
+          camera={{ position: [5, 5, 5], fov }}
           gl={{ antialias: true }}
         >
           <ambientLight intensity={0.5} />
@@ -22,8 +37,8 @@ function App() {
             enablePan={true}
             enableZoom={true}
             enableRotate={true}
-            minDistance={3}
-            maxDistance={15}
+            minDistance={isMobile ? 4 : 3}
+            maxDistance={isMobile ? 12 : 15}
           />
         </Canvas>
         <UIOverlay />
