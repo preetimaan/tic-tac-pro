@@ -236,6 +236,31 @@
   line-height: 1.5;
 }
 
+.attribution {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.attribution-text {
+  color: #666;
+  font-size: 11px;
+  margin: 4px 0;
+  line-height: 1.4;
+}
+
+.attribution-link {
+  color: #667eea;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.attribution-link:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
 .piece-selector {
   margin-bottom: 20px;
   padding-bottom: 16px;
@@ -459,6 +484,15 @@
   .instructions {
     display: none;
   }
+
+  .attribution {
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+
+  .attribution-text {
+    font-size: 10px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -527,6 +561,15 @@
 
   .instructions {
     display: none;
+  }
+
+  .attribution {
+    margin-top: 8px;
+    padding-top: 8px;
+  }
+
+  .attribution-text {
+    font-size: 9px;
   }
 }
 

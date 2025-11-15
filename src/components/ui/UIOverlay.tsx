@@ -159,6 +159,15 @@ export default function UIOverlay() {
           <p>Click on a cell to place your piece</p>
           <p>Rotate: Click + Drag | Zoom: Scroll</p>
         </div>
+
+        <div className="attribution">
+          <p className="attribution-text">
+            Created by <a href="https://github.com/preetimaan" target="_blank" rel="noopener noreferrer" className="attribution-link">Preeti Maan</a>
+          </p>
+          <p className="attribution-text">
+            Assisted by <a href="https://www.cursor.com/en" target="_blank" rel="noopener noreferrer" className="attribution-link">AI</a>
+          </p>
+        </div>
         </div>
       </div>
       <RulesModal isOpen={showRules} onClose={() => setShowRules(false)} />
