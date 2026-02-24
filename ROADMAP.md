@@ -26,6 +26,8 @@
 - [x] Score display
 - [x] Rules modal
 - [x] Modern, polished UI
+- [x] Human vs Computer (Regular mode): opponent selector, AI difficulty, "AI is thinking" indicator
+- [x] Total games played count (resets when switching opponent type)
 
 ---
 
@@ -34,22 +36,22 @@
 ### High Priority
 
 #### 1. Human vs Computer (AI) Mode
-**Status**: Not Started  
+**Status**: ✅ Regular mode complete | ⏳ 3D & Stacked planned  
 **Priority**: High  
-**Description**: Add AI opponent using Minimax algorithm with difficulty levels.
+**Description**: AI opponent using Minimax with difficulty levels.
 
-**Tasks**:
-- [ ] Implement Minimax algorithm for all game modes
-- [ ] Add difficulty levels (Easy, Medium, Hard)
-- [ ] Create AI player type in game state
-- [ ] Add player selection UI (Human vs Human, Human vs AI)
-- [ ] Implement AI move calculation
-- [ ] Add AI thinking delay/animation
-- [ ] Handle AI moves in game reducer
-- [ ] Test AI across all game modes
+**Done (Regular mode):**
+- [x] Minimax with alpha-beta pruning (Regular 3×3)
+- [x] Difficulty levels (Easy, Medium, Hard)
+- [x] Opponent selector (Human vs Human, Human vs Computer)
+- [x] AI move calculation and thinking delay
+- [x] Win messages: "You Win!" / "Computer Wins!" in vs Computer
+- [x] Total games played; resets on opponent switch
 
-**Estimated Effort**: Medium  
-**Impact**: High
+**Remaining:**
+- [ ] Implement AI for 3D mode
+- [ ] Implement AI for Stacked mode
+- [ ] Test AI across 3D and Stacked
 
 #### 2. Remote Multiplayer Mode
 **Status**: Not Started  
@@ -198,7 +200,7 @@
 
 ## 🐛 Known Issues
 
-1. **No AI opponent** - Currently only supports local two-player
+1. **No AI for 3D/Stacked** - AI only in Regular mode
 2. **No online multiplayer** - Cannot play with remote players
 3. **No game persistence** - Game state lost on refresh
 4. **Limited mobile controls** - Touch controls could be improved
@@ -210,7 +212,7 @@
 
 | Feature | Priority | Effort | Impact | Status |
 |---------|----------|--------|--------|--------|
-| Human vs Computer (AI) | High | Medium | High | Not Started |
+| Human vs Computer (AI) | High | Medium | High | ✅ Regular done; 3D/Stacked planned |
 | Remote Multiplayer | High | High | High | Not Started |
 | Enhanced AI Features | Medium | Medium | Medium | Not Started |
 | Game History & Stats | Medium | Low-Medium | Medium | Not Started |
@@ -225,10 +227,11 @@
 
 ## 🎯 Current Sprint Goals
 
-1. ⏳ Implement Human vs Computer (AI) mode
-2. ⏳ Implement Remote Multiplayer mode
-3. ⏳ Add sound effects
-4. ⏳ Improve mobile controls
+1. ✅ Human vs Computer (AI) for Regular mode
+2. ⏳ Extend AI to 3D and Stacked modes (optional)
+3. ⏳ Implement Remote Multiplayer mode
+4. ⏳ Add sound effects
+5. ⏳ Improve mobile controls
 
 ---
 
@@ -236,11 +239,12 @@
 
 ### Phase 1: Core Features (Current Sprint)
 
-#### 1. **AI Opponent**
-- Toggle between "Human vs Human" and "Human vs AI"
-- Select difficulty level (Easy, Medium, Hard)
-- AI makes moves automatically after player
-- Show "AI is thinking..." indicator
+#### 1. **AI Opponent (Regular mode — done)**
+- Toggle "Human vs Human" vs "Human vs Computer"
+- Difficulty: Easy, Medium, Hard (default: Easy)
+- Computer side (X or O) chosen at random; game starts automatically
+- "AI is thinking..." indicator; win messages: "You Win!" / "Computer Wins!"
+- Total games played (resets when switching opponent type)
 
 #### 2. **Remote Multiplayer**
 - "Create Game" button → generates room code
@@ -328,7 +332,7 @@
 
 | Mode | Local 2P | AI | Multiplayer |
 |------|----------|----|-------------| 
-| Regular | ✅ | ⏳ | ⏳ |
+| Regular | ✅ | ✅ | ⏳ |
 | 3D | ✅ | ⏳ | ⏳ |
 | Stacked | ✅ | ⏳ | ⏳ |
 

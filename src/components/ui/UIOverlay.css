@@ -139,6 +139,117 @@
   text-transform: capitalize;
 }
 
+/* Player selector (Regular mode – Human vs AI) */
+.player-selector {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.player-selector label,
+.difficulty-option label {
+  display: block;
+  color: #aaa;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.player-option,
+.difficulty-option {
+  margin-bottom: 10px;
+}
+
+.player-option:last-child,
+.difficulty-option {
+  margin-bottom: 0;
+}
+
+.player-selector select {
+  width: 100%;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.player-selector select option {
+  background: #2a2a2a;
+  color: #e0e0e0;
+}
+
+.player-selector select:hover,
+.player-selector select:focus {
+  border-color: rgba(255, 255, 255, 0.35);
+  outline: none;
+}
+
+.player-selector-disabled {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.start-game-button {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.start-game-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.start-game-button:active {
+  transform: translateY(0);
+}
+
+/* AI thinking indicator */
+.ai-thinking {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  background: rgba(78, 205, 196, 0.15);
+  border: 1px solid rgba(78, 205, 196, 0.3);
+  border-radius: 8px;
+}
+
+.ai-thinking-text {
+  color: #4ecdc4;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.ai-thinking-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(78, 205, 196, 0.3);
+  border-top-color: #4ecdc4;
+  border-radius: 50%;
+  animation: ai-spin 0.8s linear infinite;
+}
+
+@keyframes ai-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .scores {
   display: flex;
   justify-content: space-around;
@@ -165,6 +276,21 @@
   color: #fff;
   font-size: 32px;
   font-weight: 700;
+}
+
+.total-games-played {
+  text-align: center;
+  margin-bottom: 16px;
+  color: #aaa;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.total-games-played .total-games-value {
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .status {

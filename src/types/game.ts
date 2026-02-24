@@ -2,6 +2,9 @@ export type PlayerId = 1 | 2 | null
 export type GameStatus = 'playing' | 'won' | 'draw'
 export type GameMode = 'regular' | '3d' | 'stacked'
 export type PieceSize = 'small' | 'medium' | 'large'
+export type PlayerType = 'human' | 'ai'
+export type Difficulty = 'easy' | 'medium' | 'hard'
+export type OpponentType = 'human' | 'computer'
 
 export interface StackedPiece {
   playerId: 1 | 2

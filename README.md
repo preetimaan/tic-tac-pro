@@ -6,13 +6,19 @@ A beautiful 3D Tic-Tac-Toe game built with React, Three.js, and Vite. Features m
 
 ### Regular Mode (X & O)
 
-Classic 3×3 Tic-Tac-Toe with X and O pieces.
+Classic 3×3 Tic-Tac-Toe with X and O pieces. Play against a friend or the computer.
 
 **Rules:**
 - Players take turns placing their pieces on a 3×3 grid
 - First player to get 3 pieces in a row (horizontal, vertical, or diagonal) wins
 - If all 9 cells are filled with no winner, it's a draw
 - Starting player is randomized each game
+
+**Human vs Computer (Regular only):**
+- Choose **Human vs Human** or **Human vs Computer**
+- When vs Computer: AI side (X or O) is chosen at random; select difficulty (Easy, Medium, Hard)
+- Easy: random valid moves. Medium: Minimax depth 3. Hard: full Minimax with alpha-beta
+- "AI is thinking..." shown on computer's turn; total games played is tracked and resets when you switch opponent type
 
 **Winning Lines:** 8 possible (3 rows, 3 columns, 2 diagonals)
 
@@ -106,17 +112,17 @@ npm run build
 ## Features
 
 - 🎮 Multiple game modes (Regular, 3D, Stacked)
+- 🤖 **Human vs Computer** in Regular mode (Easy / Medium / Hard AI, Minimax)
 - ✨ Smooth animations and visual effects
 - 🎯 Win detection with highlighted winning line
-- 📊 Score tracking
+- 📊 Score tracking and total games played count
 - 🎨 Modern, polished UI
 - 🖱️ Intuitive camera controls
 - 🎲 Randomized starting player
 
 ## Future Enhancements
 
-- AI opponent with Minimax algorithm
-- Difficulty levels
+- AI for 3D and Stacked modes
 - Sound effects
 - Particle effects on win
 - Online multiplayer

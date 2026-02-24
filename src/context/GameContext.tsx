@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useReducer, useCallback } from 'react'
-import { GameState, GameMode, MODE_CONFIGS, PieceSize, StackedPiece } from '../types/game'
+import React, { createContext, useContext, useReducer, useCallback, useEffect, useRef } from 'react'
+import { GameState, GameMode, MODE_CONFIGS, PieceSize, StackedPiece, Difficulty, OpponentType } from '../types/game'
 import { checkWinner as checkWinnerRegular, checkDraw as checkDrawRegular, getGameStatus, makeMove } from '../utils/gameLogic'
 import { checkWinner as checkWinner3D, checkDraw as checkDraw3D } from '../utils/gameLogic3D'
 import { checkWinner as checkWinnerStacked, checkDraw as checkDrawStacked, placeStackedPiece, canPlacePiece } from '../utils/gameLogicStacked'
+import { calculateAIMoveRegular } from '../utils/ai'
 import { useSettings } from './SettingsContext'
 
 type GameAction =
@@ -182,6 +183,12 @@ interface GameContextType {
   makeMove: (index: number) => void
   resetGame: () => void
   setSelectedPieceSize?: (size: PieceSize) => void
+  opponentType: OpponentType
+  aiPlayerId: 1 | 2 | null
+  aiDifficulty: Difficulty
+  totalGamesPlayed: number
+  setOpponentType: (t: OpponentType) => void
+  setAIDifficulty: (difficulty: Difficulty) => void
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined)
@@ -189,10 +196,37 @@ const GameContext = createContext<GameContextType | undefined>(undefined)
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const { gameMode } = useSettings()
   const [state, dispatch] = useReducer(gameReducer, getInitialState(gameMode))
+  const [opponentType, setOpponentTypeState] = React.useState<OpponentType>('computer')
+  const [aiPlayerId, setAiPlayerId] = React.useState<1 | 2 | null>(() => Math.random() < 0.5 ? 1 : 2)
+  const [totalGamesPlayed, setTotalGamesPlayed] = React.useState(0)
+  const [aiDifficulty, setAiDifficultyState] = React.useState<Difficulty>('easy')
+  const aiScheduledRef = useRef(false)
+  const stateRef = useRef(state)
+  const prevStatusRef = useRef<GameState['status']>(state.status)
+  stateRef.current = state
+
+  const setOpponentType = useCallback((t: OpponentType) => {
+    setOpponentTypeState(t)
+    if (t === 'computer') {
+      setAiPlayerId(Math.random() < 0.5 ? 1 : 2)
+    } else {
+      setAiPlayerId(null)
+    }
+    setTotalGamesPlayed(0)
+  }, [])
+
+  const setAIDifficulty = useCallback((d: Difficulty) => {
+    setAiDifficultyState(d)
+  }, [])
 
   // Update board when mode changes
   React.useEffect(() => {
     dispatch({ type: 'SET_MODE', mode: gameMode })
+    if (gameMode === 'regular' && opponentType === 'computer') {
+      setAiPlayerId(Math.random() < 0.5 ? 1 : 2)
+    } else if (gameMode !== 'regular') {
+      setAiPlayerId(null)
+    }
   }, [gameMode])
 
   const handleMakeMove = useCallback((index: number) => {
@@ -201,7 +235,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const handleResetGame = useCallback(() => {
     dispatch({ type: 'RESET_GAME', mode: gameMode })
-  }, [gameMode])
+    if (gameMode === 'regular' && opponentType === 'computer') {
+      setAiPlayerId(Math.random() < 0.5 ? 1 : 2)
+    }
+  }, [gameMode, opponentType])
 
   const handleSetSelectedPieceSize = useCallback((size: PieceSize) => {
     dispatch({ type: 'SELECT_PIECE_SIZE', size })
@@ -213,6 +250,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: 'UPDATE_SCORE', winner: state.winner })
     }
   }, [state.status, state.winner])
+
+  // Count total games played (won or draw)
+  React.useEffect(() => {
+    if ((state.status === 'won' || state.status === 'draw') && prevStatusRef.current === 'playing') {
+      setTotalGamesPlayed((n) => n + 1)
+    }
+    prevStatusRef.current = state.status
+  }, [state.status])
 
   // Auto-reset game 30 seconds after win or draw
   React.useEffect(() => {
@@ -227,6 +272,42 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state.status, handleResetGame])
 
+  // AI move (Regular mode only)
+  useEffect(() => {
+    if (
+      gameMode !== 'regular' ||
+      state.status !== 'playing' ||
+      aiPlayerId === null
+    ) {
+      aiScheduledRef.current = false
+      return
+    }
+    if (state.currentPlayer !== aiPlayerId) {
+      aiScheduledRef.current = false
+      return
+    }
+    if (aiScheduledRef.current) return
+    aiScheduledRef.current = true
+
+    const board = stateRef.current.board as (1 | 2 | null)[]
+    const isFirstMove = board.every((c) => c === null)
+    const delay = isFirstMove
+      ? 1500 + Math.random() * 1000
+      : 500 + Math.random() * 1000
+
+    const timer = setTimeout(() => {
+      const move = calculateAIMoveRegular(stateRef.current, aiDifficulty)
+      aiScheduledRef.current = false
+      if (move !== null) {
+        handleMakeMove(move)
+      }
+    }, delay)
+    return () => {
+      clearTimeout(timer)
+      aiScheduledRef.current = false
+    }
+  }, [gameMode, state.currentPlayer, state.status, aiPlayerId, aiDifficulty, handleMakeMove])
+
   return (
     <GameContext.Provider
       value={{
@@ -234,6 +315,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         makeMove: handleMakeMove,
         resetGame: handleResetGame,
         setSelectedPieceSize: gameMode === 'stacked' ? handleSetSelectedPieceSize : undefined,
+        opponentType,
+        aiPlayerId,
+        aiDifficulty,
+        totalGamesPlayed,
+        setOpponentType,
+        setAIDifficulty,
       }}
     >
       {children}

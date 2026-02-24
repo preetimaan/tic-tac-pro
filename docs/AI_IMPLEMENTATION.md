@@ -1,6 +1,8 @@
 # AI Implementation Guide - Human vs Computer Mode
 
-This guide explains how to implement an AI opponent using the Minimax algorithm with alpha-beta pruning for all three game modes.
+**Status:** Regular (3×3) mode is implemented. This guide describes the approach and can be used to extend AI to 3D and Stacked modes.
+
+The AI uses the Minimax algorithm with alpha-beta pruning. Three difficulty levels are supported.
 
 ## Overview
 
