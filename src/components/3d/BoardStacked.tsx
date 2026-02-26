@@ -11,8 +11,13 @@ const CELL_SPACING = 1.2
 const BOARD_OFFSET = ((BOARD_SIZE - 1) * CELL_SPACING) / 2
 
 export default function BoardStacked() {
-  const { state } = useGame()
+  const { state, aiPlayerId, opponentType } = useGame()
   const [hoveredCell, setHoveredCell] = useState<number | null>(null)
+
+  const isHumanTurn =
+    opponentType !== 'computer' ||
+    aiPlayerId === null ||
+    state.currentPlayer !== aiPlayerId
 
   const cells = useMemo(() => {
     const cellPositions = []
@@ -84,8 +89,9 @@ export default function BoardStacked() {
         const hasStack = stack.length > 0
         
         // Check if we can show preview for this cell
-        const canShowPreview = hoveredCell === index && 
-          state.status === 'playing' && 
+        const canShowPreview = hoveredCell === index &&
+          state.status === 'playing' &&
+          isHumanTurn &&
           selectedPieceSize &&
           state.remainingPieces &&
           state.remainingPieces[currentPlayer][selectedPieceSize] > 0 &&

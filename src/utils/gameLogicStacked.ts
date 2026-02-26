@@ -74,9 +74,9 @@ export function placeStackedPiece(
 }
 
 /**
- * Get the top piece player for each cell (for win detection)
+ * Get the top piece player for each cell (for win detection and AI evaluation)
  */
-function getTopPieces(board: StackedPiece[][]): PlayerId[] {
+export function getTopPieces(board: StackedPiece[][]): PlayerId[] {
   return board.map(stack => {
     const topPiece = getTopPiece(stack)
     return topPiece ? topPiece.playerId : null

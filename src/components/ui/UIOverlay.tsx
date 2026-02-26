@@ -21,7 +21,7 @@ export default function UIOverlay() {
   const isGameActive = state.status === 'playing' && hasPiecesPlaced
   const showGameOverlay = state.status === 'won' || state.status === 'draw'
 
-  const isVsComputer = (gameMode === 'regular' || gameMode === '3d') && opponentType === 'computer' && aiPlayerId !== null
+  const isVsComputer = (gameMode === 'regular' || gameMode === '3d' || gameMode === 'stacked') && opponentType === 'computer' && aiPlayerId !== null
   const getPlayerLabel = (playerId: 1 | 2) => {
     const name = playerId === 1 ? config.player1.name : config.player2.name
     if (!isVsComputer) return name
@@ -156,7 +156,7 @@ export default function UIOverlay() {
           </div>
         </div>
 
-        {(gameMode === 'regular' || gameMode === '3d') && (
+        {(gameMode === 'regular' || gameMode === '3d' || gameMode === 'stacked') && (
           <PlayerSelector
             opponentType={opponentType}
             aiDifficulty={aiDifficulty}
@@ -166,7 +166,7 @@ export default function UIOverlay() {
           />
         )}
 
-        {(gameMode === 'regular' || gameMode === '3d') &&
+        {(gameMode === 'regular' || gameMode === '3d' || gameMode === 'stacked') &&
           state.status === 'playing' &&
           aiPlayerId !== null &&
           state.currentPlayer === aiPlayerId && (

@@ -3,11 +3,12 @@ import { GameState, GameMode, MODE_CONFIGS, PieceSize, StackedPiece, Difficulty,
 import { checkWinner as checkWinnerRegular, checkDraw as checkDrawRegular, getGameStatus, makeMove } from '../utils/gameLogic'
 import { checkWinner as checkWinner3D, checkDraw as checkDraw3D } from '../utils/gameLogic3D'
 import { checkWinner as checkWinnerStacked, checkDraw as checkDrawStacked, placeStackedPiece, canPlacePiece } from '../utils/gameLogicStacked'
-import { calculateAIMoveRegular, calculateAIMove3D } from '../utils/ai'
+import { calculateAIMoveRegular, calculateAIMove3D, calculateAIMoveStacked } from '../utils/ai'
 import { useSettings } from './SettingsContext'
 
 type GameAction =
   | { type: 'MAKE_MOVE'; index: number }
+  | { type: 'MAKE_STACKED_MOVE'; index: number; pieceSize: PieceSize }
   | { type: 'RESET_GAME'; mode: GameMode }
   | { type: 'UPDATE_SCORE'; winner: 1 | 2 }
   | { type: 'SET_MODE'; mode: GameMode }
@@ -139,6 +140,45 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         winningLine,
       }
     }
+    case 'MAKE_STACKED_MOVE': {
+      if (state.mode !== 'stacked' || state.status !== 'playing' || !state.remainingPieces) {
+        return state
+      }
+      const board = state.board as StackedPiece[][]
+      const remainingPieces = { ...state.remainingPieces }
+      const playerPieces = remainingPieces[state.currentPlayer]
+      if (playerPieces[action.pieceSize] === 0) return state
+      if (!canPlacePiece(board, action.index, action.pieceSize)) return state
+
+      const newBoard = placeStackedPiece(board, action.index, state.currentPlayer, action.pieceSize)
+      const newRemainingPieces = {
+        ...remainingPieces,
+        [state.currentPlayer]: {
+          ...playerPieces,
+          [action.pieceSize]: playerPieces[action.pieceSize] - 1,
+        },
+      }
+      const { winner, winningLine } = checkWinnerStacked(newBoard)
+      const isDraw = checkDrawStacked(newBoard, newRemainingPieces)
+      const status = getGameStatus(winner, isDraw)
+      const nextPlayer = state.currentPlayer === 1 ? 2 : 1
+      const nextPlayerPieces = newRemainingPieces[nextPlayer]
+      let nextSelectedSize: PieceSize = 'small'
+      if (nextPlayerPieces.small > 0) nextSelectedSize = 'small'
+      else if (nextPlayerPieces.medium > 0) nextSelectedSize = 'medium'
+      else if (nextPlayerPieces.large > 0) nextSelectedSize = 'large'
+
+      return {
+        ...state,
+        board: newBoard,
+        currentPlayer: nextPlayer,
+        status,
+        winner,
+        winningLine,
+        remainingPieces: newRemainingPieces,
+        selectedPieceSize: nextSelectedSize,
+      }
+    }
     case 'SELECT_PIECE_SIZE': {
       if (state.mode !== 'stacked' || !state.remainingPieces) {
         return state
@@ -180,7 +220,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
 interface GameContextType {
   state: GameState
-  makeMove: (index: number) => void
+  makeMove: (index: number, pieceSize?: PieceSize) => void
   resetGame: () => void
   setSelectedPieceSize?: (size: PieceSize) => void
   opponentType: OpponentType
@@ -222,20 +262,24 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   // Update board when mode changes
   React.useEffect(() => {
     dispatch({ type: 'SET_MODE', mode: gameMode })
-    if ((gameMode === 'regular' || gameMode === '3d') && opponentType === 'computer') {
+    if ((gameMode === 'regular' || gameMode === '3d' || gameMode === 'stacked') && opponentType === 'computer') {
       setAiPlayerId(Math.random() < 0.5 ? 1 : 2)
-    } else if (gameMode === 'stacked' || opponentType === 'human') {
+    } else if (opponentType === 'human') {
       setAiPlayerId(null)
     }
   }, [gameMode, opponentType])
 
-  const handleMakeMove = useCallback((index: number) => {
-    dispatch({ type: 'MAKE_MOVE', index })
-  }, [])
+  const handleMakeMove = useCallback((index: number, pieceSize?: PieceSize) => {
+    if (gameMode === 'stacked' && pieceSize !== undefined) {
+      dispatch({ type: 'MAKE_STACKED_MOVE', index, pieceSize })
+    } else {
+      dispatch({ type: 'MAKE_MOVE', index })
+    }
+  }, [gameMode])
 
   const handleResetGame = useCallback(() => {
     dispatch({ type: 'RESET_GAME', mode: gameMode })
-    if ((gameMode === 'regular' || gameMode === '3d') && opponentType === 'computer') {
+    if ((gameMode === 'regular' || gameMode === '3d' || gameMode === 'stacked') && opponentType === 'computer') {
       setAiPlayerId(Math.random() < 0.5 ? 1 : 2)
     }
   }, [gameMode, opponentType])
@@ -272,10 +316,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state.status, handleResetGame])
 
-  // AI move (Regular and 3D modes)
+  // AI move (Regular, 3D, Stacked modes)
   useEffect(() => {
     if (
-      (gameMode !== 'regular' && gameMode !== '3d') ||
+      (gameMode !== 'regular' && gameMode !== '3d' && gameMode !== 'stacked') ||
       state.status !== 'playing' ||
       aiPlayerId === null
     ) {
@@ -289,21 +333,38 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     if (aiScheduledRef.current) return
     aiScheduledRef.current = true
 
-    const board = stateRef.current.board as (1 | 2 | null)[]
-    const isFirstMove = board.every((c) => c === null)
-    const delay = isFirstMove
-      ? 1500 + Math.random() * 1000
-      : 500 + Math.random() * 1000
+    const delay = (() => {
+      if (gameMode === 'stacked') {
+        return 500 + Math.random() * 1000
+      }
+      const board = stateRef.current.board as (1 | 2 | null)[]
+      const isFirstMove = Array.isArray(board) && board.every((c) => c === null)
+      return isFirstMove ? 1500 + Math.random() * 1000 : 500 + Math.random() * 1000
+    })()
 
     const timer = setTimeout(() => {
-      const move =
-        gameMode === '3d'
-          ? calculateAIMove3D(stateRef.current, aiDifficulty)
-          : calculateAIMoveRegular(stateRef.current, aiDifficulty)
-      aiScheduledRef.current = false
-      if (move !== null) {
-        handleMakeMove(move)
+      const s = stateRef.current
+      let made = false
+      if (gameMode === '3d') {
+        const move = calculateAIMove3D(s, aiDifficulty)
+        if (move !== null) {
+          handleMakeMove(move)
+          made = true
+        }
+      } else if (gameMode === 'stacked') {
+        const move = calculateAIMoveStacked(s, aiDifficulty)
+        if (move !== null) {
+          handleMakeMove(move.index, move.pieceSize)
+          made = true
+        }
+      } else {
+        const move = calculateAIMoveRegular(s, aiDifficulty)
+        if (move !== null) {
+          handleMakeMove(move)
+          made = true
+        }
       }
+      aiScheduledRef.current = false
     }, delay)
     return () => {
       clearTimeout(timer)

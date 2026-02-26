@@ -1,4 +1,4 @@
-import { GameState, PlayerId, Difficulty } from '../types/game'
+import { GameState, PlayerId, Difficulty, PieceSize, StackedPiece } from '../types/game'
 import {
   checkWinner,
   checkDraw,
@@ -12,6 +12,14 @@ import {
   makeMove as makeMoveOnBoard3D,
   getWinningLines3D,
 } from './gameLogic3D'
+import {
+  checkWinner as checkWinnerStacked,
+  checkDraw as checkDrawStacked,
+  getGameStatus as getGameStatusStacked,
+  placeStackedPiece,
+  canPlacePiece as canPlacePieceStacked,
+  getTopPieces,
+} from './gameLogicStacked'
 
 /**
  * AI for Regular (3×3) mode only. Returns move index or null if not regular / no moves.
@@ -261,6 +269,169 @@ function evaluate3DPosition(board: PlayerId[], currentPlayer: 1 | 2): number {
     const opponentCount = values.filter((v) => v === opponent).length
     const emptyCount = values.filter((v) => v === null).length
 
+    if (currentCount === 2 && emptyCount === 1) score += 10
+    if (opponentCount === 2 && emptyCount === 1) score -= 10
+    if (currentCount === 3) score += 100
+    if (opponentCount === 3) score -= 100
+  }
+  return score
+}
+
+// --- Stacked mode AI ---
+
+export interface StackedMove {
+  index: number
+  pieceSize: PieceSize
+}
+
+/**
+ * AI for Stacked mode. Returns { index, pieceSize } or null if not stacked / no moves.
+ */
+export function calculateAIMoveStacked(
+  state: GameState,
+  difficulty: Difficulty
+): StackedMove | null {
+  if (state.mode !== 'stacked' || state.status !== 'playing' || !state.remainingPieces) {
+    return null
+  }
+
+  const validMoves = getValidMovesStacked(state)
+  if (validMoves.length === 0) return null
+
+  if (difficulty === 'easy') {
+    return validMoves[Math.floor(Math.random() * validMoves.length)]
+  }
+
+  const depth = difficulty === 'medium' ? 2 : 4
+  const result = minimaxStacked(state, depth, -Infinity, Infinity, true)
+  return result.move
+}
+
+function getValidMovesStacked(state: GameState): StackedMove[] {
+  const board = state.board as StackedPiece[][]
+  const remaining = state.remainingPieces!
+  const player = state.currentPlayer
+  const pieces = remaining[player]
+  const moves: StackedMove[] = []
+  for (let index = 0; index < 9; index++) {
+    if (pieces.small > 0 && canPlacePieceStacked(board, index, 'small')) {
+      moves.push({ index, pieceSize: 'small' })
+    }
+    if (pieces.medium > 0 && canPlacePieceStacked(board, index, 'medium')) {
+      moves.push({ index, pieceSize: 'medium' })
+    }
+    if (pieces.large > 0 && canPlacePieceStacked(board, index, 'large')) {
+      moves.push({ index, pieceSize: 'large' })
+    }
+  }
+  return moves
+}
+
+interface StackedMinimaxResult {
+  score: number
+  move: StackedMove | null
+}
+
+function minimaxStacked(
+  state: GameState,
+  depth: number,
+  alpha: number,
+  beta: number,
+  maximizing: boolean
+): StackedMinimaxResult {
+  const board = state.board as StackedPiece[][]
+  const remaining = state.remainingPieces!
+  const currentPlayer = state.currentPlayer
+  const opponent: 1 | 2 = currentPlayer === 1 ? 2 : 1
+
+  const { winner } = checkWinnerStacked(board)
+  const isDraw = checkDrawStacked(board, remaining)
+  const status = getGameStatusStacked(winner, isDraw)
+
+  if (status === 'won') {
+    const score = winner === currentPlayer ? 100 : -100
+    return { score, move: null }
+  }
+  if (status === 'draw') {
+    return { score: 0, move: null }
+  }
+  if (depth === 0) {
+    return { score: evaluateStackedPosition(board, currentPlayer), move: null }
+  }
+
+  const validMoves = getValidMovesStacked(state)
+  if (validMoves.length === 0) {
+    return { score: 0, move: null }
+  }
+
+  let bestMove = validMoves[0]
+  let bestScore = maximizing ? -Infinity : Infinity
+
+  for (const { index, pieceSize } of validMoves) {
+    const playerToMove = maximizing ? currentPlayer : opponent
+    const newBoard = placeStackedPiece(board, index, playerToMove, pieceSize)
+    const newRemaining = {
+      ...remaining,
+      [playerToMove]: {
+        ...remaining[playerToMove],
+        [pieceSize]: remaining[playerToMove][pieceSize] - 1,
+      },
+    }
+    const nextPlayer = (playerToMove === 1 ? 2 : 1) as 1 | 2
+    const nextPieces = newRemaining[nextPlayer]
+    let nextSize: PieceSize = 'small'
+    if (nextPieces.small > 0) nextSize = 'small'
+    else if (nextPieces.medium > 0) nextSize = 'medium'
+    else if (nextPieces.large > 0) nextSize = 'large'
+
+    const newState: GameState = {
+      ...state,
+      board: newBoard,
+      currentPlayer: nextPlayer,
+      remainingPieces: newRemaining,
+      selectedPieceSize: nextSize,
+    }
+    const { winner: w } = checkWinnerStacked(newBoard)
+    const draw = checkDrawStacked(newBoard, newRemaining)
+    newState.status = getGameStatusStacked(w, draw)
+    newState.winner = w
+
+    const result = minimaxStacked(newState, depth - 1, alpha, beta, !maximizing)
+
+    if (maximizing) {
+      if (result.score > bestScore) {
+        bestScore = result.score
+        bestMove = { index, pieceSize }
+      }
+      alpha = Math.max(alpha, bestScore)
+    } else {
+      if (result.score < bestScore) {
+        bestScore = result.score
+        bestMove = { index, pieceSize }
+      }
+      beta = Math.min(beta, bestScore)
+    }
+    if (beta <= alpha) break
+  }
+
+  return { score: bestScore, move: bestMove }
+}
+
+const STACKED_LINES = [
+  [0, 1, 2], [3, 4, 5], [6, 7, 8],
+  [0, 3, 6], [1, 4, 7], [2, 5, 8],
+  [0, 4, 8], [2, 4, 6],
+]
+
+function evaluateStackedPosition(board: StackedPiece[][], currentPlayer: 1 | 2): number {
+  const topPieces = getTopPieces(board)
+  const opponent: 1 | 2 = currentPlayer === 1 ? 2 : 1
+  let score = 0
+  for (const [a, b, c] of STACKED_LINES) {
+    const values = [topPieces[a], topPieces[b], topPieces[c]]
+    const currentCount = values.filter((v) => v === currentPlayer).length
+    const opponentCount = values.filter((v) => v === opponent).length
+    const emptyCount = values.filter((v) => v === null).length
     if (currentCount === 2 && emptyCount === 1) score += 10
     if (opponentCount === 2 && emptyCount === 1) score -= 10
     if (currentCount === 3) score += 100
