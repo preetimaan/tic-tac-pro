@@ -40,7 +40,7 @@ export function calculateAIMoveRegular(
     return validMoves[Math.floor(Math.random() * validMoves.length)]
   }
 
-  const depth = difficulty === 'medium' ? 3 : 10
+  const depth = difficulty === 'medium' ? 3 : 8
   const result = minimax(state, depth, -Infinity, Infinity, true)
   return result.move
 }
@@ -176,7 +176,7 @@ export function calculateAIMove3D(
     return validMoves[Math.floor(Math.random() * validMoves.length)]
   }
 
-  const depth = difficulty === 'medium' ? 2 : 4
+  const depth = difficulty === 'medium' ? 2 : 3
   const result = minimax3D(state, depth, -Infinity, Infinity, true)
   return result.move
 }
@@ -302,7 +302,7 @@ export function calculateAIMoveStacked(
     return validMoves[Math.floor(Math.random() * validMoves.length)]
   }
 
-  const depth = difficulty === 'medium' ? 2 : 4
+  const depth = difficulty === 'medium' ? 2 : 3
   const result = minimaxStacked(state, depth, -Infinity, Infinity, true)
   return result.move
 }

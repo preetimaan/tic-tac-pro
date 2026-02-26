@@ -3,8 +3,10 @@ import { GameState, GameMode, MODE_CONFIGS, PieceSize, StackedPiece, Difficulty,
 import { checkWinner as checkWinnerRegular, checkDraw as checkDrawRegular, getGameStatus, makeMove } from '../utils/gameLogic'
 import { checkWinner as checkWinner3D, checkDraw as checkDraw3D } from '../utils/gameLogic3D'
 import { checkWinner as checkWinnerStacked, checkDraw as checkDrawStacked, placeStackedPiece, canPlacePiece } from '../utils/gameLogicStacked'
-import { calculateAIMoveRegular, calculateAIMove3D, calculateAIMoveStacked } from '../utils/ai'
 import { useSettings } from './SettingsContext'
+
+const AIWorker = () =>
+  new Worker(new URL('../workers/ai.worker.ts', import.meta.url), { type: 'module' })
 
 type GameAction =
   | { type: 'MAKE_MOVE'; index: number }
@@ -246,6 +248,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const aiScheduledRef = useRef(false)
   const stateRef = useRef(state)
   const prevStatusRef = useRef<GameState['status']>(state.status)
+  const workerRef = useRef<Worker | null>(null)
+  const handleMakeMoveRef = useRef<(index: number, pieceSize?: PieceSize) => void>(() => {})
   stateRef.current = state
 
   const setOpponentType = useCallback((t: OpponentType) => {
@@ -276,6 +280,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: 'MAKE_MOVE', index })
     }
   }, [gameMode])
+  handleMakeMoveRef.current = handleMakeMove
 
   const handleResetGame = useCallback(() => {
     dispatch({ type: 'RESET_GAME', mode: gameMode })
@@ -310,9 +315,42 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     prevStatusRef.current = state.status
   }, [state.status])
 
-  // AI move (Regular, 3D, Stacked modes)
+  // Worker for AI (runs off main thread to avoid freezing UI)
+  const aiPlayerIdRef = useRef(aiPlayerId)
+  aiPlayerIdRef.current = aiPlayerId
+  useEffect(() => {
+    const worker = AIWorker()
+    workerRef.current = worker
+    const onMessage = (e: MessageEvent<{ move: number | { index: number; pieceSize: PieceSize } | null }>) => {
+      const { move } = e.data
+      if (move === null) {
+        aiScheduledRef.current = false
+        return
+      }
+      const s = stateRef.current
+      if (s.status !== 'playing' || s.currentPlayer !== aiPlayerIdRef.current) {
+        aiScheduledRef.current = false
+        return
+      }
+      if (typeof move === 'number') {
+        handleMakeMoveRef.current(move)
+      } else {
+        handleMakeMoveRef.current(move.index, move.pieceSize)
+      }
+      aiScheduledRef.current = false
+    }
+    worker.addEventListener('message', onMessage)
+    return () => {
+      worker.removeEventListener('message', onMessage)
+      worker.terminate()
+      workerRef.current = null
+    }
+  }, [])
+
+  // AI move: after delay, post to worker (Regular, 3D, Stacked)
   useEffect(() => {
     if (
+      !gameStarted ||
       (gameMode !== 'regular' && gameMode !== '3d' && gameMode !== 'stacked') ||
       state.status !== 'playing' ||
       aiPlayerId === null
@@ -337,34 +375,23 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     })()
 
     const timer = setTimeout(() => {
-      const s = stateRef.current
-      let made = false
-      if (gameMode === '3d') {
-        const move = calculateAIMove3D(s, aiDifficulty)
-        if (move !== null) {
-          handleMakeMove(move)
-          made = true
-        }
-      } else if (gameMode === 'stacked') {
-        const move = calculateAIMoveStacked(s, aiDifficulty)
-        if (move !== null) {
-          handleMakeMove(move.index, move.pieceSize)
-          made = true
-        }
-      } else {
-        const move = calculateAIMoveRegular(s, aiDifficulty)
-        if (move !== null) {
-          handleMakeMove(move)
-          made = true
-        }
+      const w = workerRef.current
+      if (!w) {
+        aiScheduledRef.current = false
+        return
       }
-      aiScheduledRef.current = false
+      const s = stateRef.current
+      if (s.status !== 'playing' || s.currentPlayer !== aiPlayerId) {
+        aiScheduledRef.current = false
+        return
+      }
+      w.postMessage({ state: s, mode: gameMode, difficulty: aiDifficulty })
     }, delay)
     return () => {
       clearTimeout(timer)
       aiScheduledRef.current = false
     }
-  }, [gameStarted, gameMode, state.currentPlayer, state.status, aiPlayerId, aiDifficulty, handleMakeMove])
+  }, [gameStarted, gameMode, state.currentPlayer, state.status, aiPlayerId, aiDifficulty])
 
   return (
     <GameContext.Provider
