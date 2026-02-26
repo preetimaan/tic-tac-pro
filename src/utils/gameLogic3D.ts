@@ -54,6 +54,24 @@ function generate3DWinningLines(): number[][] {
   lines.push([toIndex(0, 0, 2), toIndex(1, 1, 1), toIndex(2, 2, 0)])
   lines.push([toIndex(0, 2, 0), toIndex(1, 1, 1), toIndex(2, 0, 2)])
   lines.push([toIndex(0, 2, 2), toIndex(1, 1, 1), toIndex(2, 0, 0)])
+
+  // Slant diagonals: one cell per layer, not straight verticals nor true diagonals
+  // Same row across layers, col = layer (horizontal slant)
+  for (let row = 0; row < 3; row++) {
+    lines.push([
+      toIndex(0, row, 0),
+      toIndex(1, row, 1),
+      toIndex(2, row, 2),
+    ])
+  }
+  // Same col across layers, row = layer (vertical slant)
+  for (let col = 0; col < 3; col++) {
+    lines.push([
+      toIndex(0, 0, col),
+      toIndex(1, 1, col),
+      toIndex(2, 2, col),
+    ])
+  }
   
   return lines
 }
