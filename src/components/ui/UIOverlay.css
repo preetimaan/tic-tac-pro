@@ -196,6 +196,30 @@
 .start-game-button {
   width: 100%;
   margin-top: 12px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(72, 187, 120, 0.3);
+}
+
+.start-game-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+}
+
+.start-game-button:active {
+  transform: translateY(0);
+}
+
+.start-game-button {
+  width: 100%;
+  margin-top: 12px;
   padding: 10px 16px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;

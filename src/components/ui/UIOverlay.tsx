@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useGame } from '../../context/GameContext'
 import { useSettings } from '../../context/SettingsContext'
-import { MODE_CONFIGS, GameMode, StackedPiece } from '../../types/game'
+import { MODE_CONFIGS, GameMode } from '../../types/game'
 import RulesModal from './RulesModal'
 import PieceSelectorModal from './PieceSelectorModal'
 import PlayerSelector from './PlayerSelector'
@@ -9,17 +9,20 @@ import AIThinkingIndicator from './AIThinkingIndicator'
 import './UIOverlay.css'
 
 export default function UIOverlay() {
-  const { state, resetGame, opponentType, aiPlayerId, aiDifficulty, totalGamesPlayed, setOpponentType, setAIDifficulty } = useGame()
+  const { state, resetGame, startGame, gameStarted, opponentType, aiPlayerId, aiDifficulty, totalGamesPlayed, setOpponentType, setAIDifficulty } = useGame()
   const { gameMode, setGameMode } = useSettings()
   const config = MODE_CONFIGS[gameMode]
   const [showRules, setShowRules] = useState(false)
-  const [countdown, setCountdown] = useState(30)
-  // Allow switching if no pieces have been placed yet
-  const hasPiecesPlaced = gameMode === 'stacked'
-    ? Array.isArray(state.board) && (state.board as StackedPiece[][]).some(stack => Array.isArray(stack) && stack.length > 0)
-    : Array.isArray(state.board) && (state.board as any[]).some(cell => cell !== null)
-  const isGameActive = state.status === 'playing' && hasPiecesPlaced
-  const showGameOverlay = state.status === 'won' || state.status === 'draw'
+  const [gameOverOverlayDismissed, setGameOverOverlayDismissed] = useState(false)
+  const isGameActive = gameStarted
+  const showGameOverlay = (state.status === 'won' || state.status === 'draw') && !gameOverOverlayDismissed
+
+  // Reset overlay-dismissed when a new game is running (so next win/draw shows overlay again)
+  useEffect(() => {
+    if (state.status === 'playing') {
+      setGameOverOverlayDismissed(false)
+    }
+  }, [state.status])
 
   const isVsComputer = (gameMode === 'regular' || gameMode === '3d' || gameMode === 'stacked') && opponentType === 'computer' && aiPlayerId !== null
   const getPlayerLabel = (playerId: 1 | 2) => {
@@ -36,27 +39,11 @@ export default function UIOverlay() {
     return `${winnerLabel} Wins!`
   }
 
-  // Countdown timer for auto-reset
-  useEffect(() => {
-    if (showGameOverlay) {
-      setCountdown(30)
-      const interval = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(interval)
-            return 0
-          }
-          return prev - 1
-        })
-      }, 1000)
-
-      return () => clearInterval(interval)
-    } else {
-      setCountdown(30)
-    }
-  }, [showGameOverlay])
 
   const getStatusMessage = () => {
+    if (!gameStarted) {
+      return 'Choose options and click Start Game'
+    }
     if (state.status === 'won') {
       return getWinMessage()
     }
@@ -72,8 +59,7 @@ export default function UIOverlay() {
   }
 
   const handleModeChange = (mode: GameMode) => {
-    if (!isGameActive) {
-      // Reset game when switching modes
+    if (!gameStarted) {
       if (gameMode !== mode) {
         resetGame()
       }
@@ -82,9 +68,9 @@ export default function UIOverlay() {
   }
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Only reset if clicking the overlay itself, not the content
+    // Dismiss overlay only; don't clear board – user clicks Start Game to play again
     if (e.target === e.currentTarget) {
-      resetGame()
+      setGameOverOverlayDismissed(true)
     }
   }
 
@@ -104,7 +90,7 @@ export default function UIOverlay() {
                 : "It's a Draw!"}
             </h2>
             <p className="game-over-subtitle">
-              Game will reset in {countdown} seconds
+              Click outside or use Start Game below to play again
             </p>
           </div>
         </div>
@@ -160,8 +146,10 @@ export default function UIOverlay() {
           <PlayerSelector
             opponentType={opponentType}
             aiDifficulty={aiDifficulty}
+            gameStarted={gameStarted}
             onOpponentTypeChange={setOpponentType}
             onDifficultyChange={setAIDifficulty}
+            onStartGame={startGame}
             disabled={isGameActive}
           />
         )}

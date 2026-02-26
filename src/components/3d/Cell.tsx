@@ -13,14 +13,15 @@ interface CellProps {
 
 export default function Cell({ index, position, onHover }: CellProps) {
   const meshRef = useRef<THREE.Mesh>(null)
-  const { state, makeMove, aiPlayerId, opponentType } = useGame()
+  const { state, makeMove, aiPlayerId, opponentType, gameStarted } = useGame()
   const { gameMode } = useSettings()
 
   const isCurrentPlayerHuman =
-    (gameMode !== 'regular' && gameMode !== '3d' && gameMode !== 'stacked') ||
-    opponentType !== 'computer' ||
-    aiPlayerId === null ||
-    state.currentPlayer !== aiPlayerId
+    gameStarted &&
+    ((gameMode !== 'regular' && gameMode !== '3d' && gameMode !== 'stacked') ||
+      opponentType !== 'computer' ||
+      aiPlayerId === null ||
+      state.currentPlayer !== aiPlayerId)
 
   const canPlace = () => {
     if (state.status !== 'playing') return false

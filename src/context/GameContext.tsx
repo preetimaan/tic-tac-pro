@@ -222,11 +222,13 @@ interface GameContextType {
   state: GameState
   makeMove: (index: number, pieceSize?: PieceSize) => void
   resetGame: () => void
+  startGame: () => void
   setSelectedPieceSize?: (size: PieceSize) => void
   opponentType: OpponentType
   aiPlayerId: 1 | 2 | null
   aiDifficulty: Difficulty
   totalGamesPlayed: number
+  gameStarted: boolean
   setOpponentType: (t: OpponentType) => void
   setAIDifficulty: (difficulty: Difficulty) => void
 }
@@ -237,7 +239,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const { gameMode } = useSettings()
   const [state, dispatch] = useReducer(gameReducer, getInitialState(gameMode))
   const [opponentType, setOpponentTypeState] = React.useState<OpponentType>('computer')
-  const [aiPlayerId, setAiPlayerId] = React.useState<1 | 2 | null>(() => Math.random() < 0.5 ? 1 : 2)
+  const [aiPlayerId, setAiPlayerId] = React.useState<1 | 2 | null>(null)
+  const [gameStarted, setGameStarted] = React.useState(false)
   const [totalGamesPlayed, setTotalGamesPlayed] = React.useState(0)
   const [aiDifficulty, setAiDifficultyState] = React.useState<Difficulty>('easy')
   const aiScheduledRef = useRef(false)
@@ -247,9 +250,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const setOpponentType = useCallback((t: OpponentType) => {
     setOpponentTypeState(t)
-    if (t === 'computer') {
-      setAiPlayerId(Math.random() < 0.5 ? 1 : 2)
-    } else {
+    if (t === 'human') {
       setAiPlayerId(null)
     }
     setTotalGamesPlayed(0)
@@ -259,14 +260,13 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     setAiDifficultyState(d)
   }, [])
 
-  // Update board when mode changes
+  // Update board when mode changes (don't set aiPlayerId here; set on Start Game)
   React.useEffect(() => {
     dispatch({ type: 'SET_MODE', mode: gameMode })
-    if ((gameMode === 'regular' || gameMode === '3d' || gameMode === 'stacked') && opponentType === 'computer') {
-      setAiPlayerId(Math.random() < 0.5 ? 1 : 2)
-    } else if (opponentType === 'human') {
+    if (opponentType === 'human') {
       setAiPlayerId(null)
     }
+    setAiDifficultyState('easy')
   }, [gameMode, opponentType])
 
   const handleMakeMove = useCallback((index: number, pieceSize?: PieceSize) => {
@@ -279,9 +279,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const handleResetGame = useCallback(() => {
     dispatch({ type: 'RESET_GAME', mode: gameMode })
-    if ((gameMode === 'regular' || gameMode === '3d' || gameMode === 'stacked') && opponentType === 'computer') {
+    setGameStarted(false)
+  }, [gameMode])
+
+  const handleStartGame = useCallback(() => {
+    setGameStarted(true)
+    if (opponentType === 'computer') {
       setAiPlayerId(Math.random() < 0.5 ? 1 : 2)
     }
+    dispatch({ type: 'RESET_GAME', mode: gameMode })
   }, [gameMode, opponentType])
 
   const handleSetSelectedPieceSize = useCallback((size: PieceSize) => {
@@ -295,26 +301,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state.status, state.winner])
 
-  // Count total games played (won or draw)
+  // Count total games played (won or draw); allow changing options again
   React.useEffect(() => {
     if ((state.status === 'won' || state.status === 'draw') && prevStatusRef.current === 'playing') {
       setTotalGamesPlayed((n) => n + 1)
+      setGameStarted(false)
     }
     prevStatusRef.current = state.status
   }, [state.status])
-
-  // Auto-reset game 30 seconds after win or draw
-  React.useEffect(() => {
-    if (state.status === 'won' || state.status === 'draw') {
-      const timer = setTimeout(() => {
-        handleResetGame()
-      }, 30000) // 30 seconds
-
-      return () => {
-        clearTimeout(timer)
-      }
-    }
-  }, [state.status, handleResetGame])
 
   // AI move (Regular, 3D, Stacked modes)
   useEffect(() => {
@@ -370,7 +364,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       clearTimeout(timer)
       aiScheduledRef.current = false
     }
-  }, [gameMode, state.currentPlayer, state.status, aiPlayerId, aiDifficulty, handleMakeMove])
+  }, [gameStarted, gameMode, state.currentPlayer, state.status, aiPlayerId, aiDifficulty, handleMakeMove])
 
   return (
     <GameContext.Provider
@@ -378,11 +372,13 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         state,
         makeMove: handleMakeMove,
         resetGame: handleResetGame,
+        startGame: handleStartGame,
         setSelectedPieceSize: gameMode === 'stacked' ? handleSetSelectedPieceSize : undefined,
         opponentType,
         aiPlayerId,
         aiDifficulty,
         totalGamesPlayed,
+        gameStarted,
         setOpponentType,
         setAIDifficulty,
       }}

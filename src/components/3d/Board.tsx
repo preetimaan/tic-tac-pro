@@ -10,15 +10,16 @@ const CELL_SPACING = 1.2
 const BOARD_OFFSET = ((BOARD_SIZE - 1) * CELL_SPACING) / 2
 
 export default function Board() {
-  const { state, aiPlayerId, opponentType } = useGame()
+  const { state, aiPlayerId, opponentType, gameStarted } = useGame()
   const { gameMode } = useSettings()
   const [hoveredCell, setHoveredCell] = useState<number | null>(null)
 
   const isHumanTurn =
-    gameMode !== 'regular' ||
-    opponentType !== 'computer' ||
-    aiPlayerId === null ||
-    state.currentPlayer !== aiPlayerId
+    gameStarted &&
+    (gameMode !== 'regular' ||
+      opponentType !== 'computer' ||
+      aiPlayerId === null ||
+      state.currentPlayer !== aiPlayerId)
 
   const cells = useMemo(() => {
     const cellPositions = []
