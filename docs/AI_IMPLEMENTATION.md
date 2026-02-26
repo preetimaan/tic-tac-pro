@@ -1,6 +1,6 @@
 # AI Implementation Guide - Human vs Computer Mode
 
-**Status:** Regular (3×3) mode is implemented. This guide describes the approach and can be used to extend AI to 3D and Stacked modes.
+**Status:** Regular (3×3) and 3D (3×3×3) modes are implemented. This guide describes the approach and can be used to extend AI to Stacked mode.
 
 The AI uses the Minimax algorithm with alpha-beta pruning. Three difficulty levels are supported.
 

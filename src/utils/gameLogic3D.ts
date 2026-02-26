@@ -60,6 +60,10 @@ function generate3DWinningLines(): number[][] {
 
 const WINNING_LINES_3D = generate3DWinningLines()
 
+export function getWinningLines3D(): number[][] {
+  return WINNING_LINES_3D
+}
+
 export function checkWinner(board: PlayerId[]): {
   winner: PlayerId
   winningLine: number[] | null

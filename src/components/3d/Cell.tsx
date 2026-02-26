@@ -17,7 +17,7 @@ export default function Cell({ index, position, onHover }: CellProps) {
   const { gameMode } = useSettings()
 
   const isCurrentPlayerHuman =
-    gameMode !== 'regular' ||
+    (gameMode !== 'regular' && gameMode !== '3d') ||
     opponentType !== 'computer' ||
     aiPlayerId === null ||
     state.currentPlayer !== aiPlayerId

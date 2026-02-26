@@ -10,8 +10,13 @@ const BOARD_OFFSET = ((BOARD_SIZE - 1) * CELL_SPACING) / 2
 const LAYER_SPACING = 1.25 // Spacing between layers in 3D mode
 
 export default function Board3D() {
-  const { state } = useGame()
+  const { state, aiPlayerId, opponentType } = useGame()
   const [hoveredCell, setHoveredCell] = useState<number | null>(null)
+
+  const isHumanTurn =
+    opponentType !== 'computer' ||
+    aiPlayerId === null ||
+    state.currentPlayer !== aiPlayerId
 
   // Generate 3D cube cell positions (3x3x3 = 27 cells)
   const cells = useMemo(() => {
@@ -71,7 +76,7 @@ export default function Board3D() {
                 isWinning={state.winningLine?.includes(index) ?? false}
               />
             )}
-            {hoveredCell === index && !cellValue && state.status === 'playing' && (
+            {hoveredCell === index && !cellValue && state.status === 'playing' && isHumanTurn && (
               <Piece
                 playerId={state.currentPlayer}
                 position={position}

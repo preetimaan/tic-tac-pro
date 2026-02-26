@@ -3,7 +3,7 @@ import { GameState, GameMode, MODE_CONFIGS, PieceSize, StackedPiece, Difficulty,
 import { checkWinner as checkWinnerRegular, checkDraw as checkDrawRegular, getGameStatus, makeMove } from '../utils/gameLogic'
 import { checkWinner as checkWinner3D, checkDraw as checkDraw3D } from '../utils/gameLogic3D'
 import { checkWinner as checkWinnerStacked, checkDraw as checkDrawStacked, placeStackedPiece, canPlacePiece } from '../utils/gameLogicStacked'
-import { calculateAIMoveRegular } from '../utils/ai'
+import { calculateAIMoveRegular, calculateAIMove3D } from '../utils/ai'
 import { useSettings } from './SettingsContext'
 
 type GameAction =
@@ -222,12 +222,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   // Update board when mode changes
   React.useEffect(() => {
     dispatch({ type: 'SET_MODE', mode: gameMode })
-    if (gameMode === 'regular' && opponentType === 'computer') {
+    if ((gameMode === 'regular' || gameMode === '3d') && opponentType === 'computer') {
       setAiPlayerId(Math.random() < 0.5 ? 1 : 2)
-    } else if (gameMode !== 'regular') {
+    } else if (gameMode === 'stacked' || opponentType === 'human') {
       setAiPlayerId(null)
     }
-  }, [gameMode])
+  }, [gameMode, opponentType])
 
   const handleMakeMove = useCallback((index: number) => {
     dispatch({ type: 'MAKE_MOVE', index })
@@ -235,7 +235,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const handleResetGame = useCallback(() => {
     dispatch({ type: 'RESET_GAME', mode: gameMode })
-    if (gameMode === 'regular' && opponentType === 'computer') {
+    if ((gameMode === 'regular' || gameMode === '3d') && opponentType === 'computer') {
       setAiPlayerId(Math.random() < 0.5 ? 1 : 2)
     }
   }, [gameMode, opponentType])
@@ -272,10 +272,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state.status, handleResetGame])
 
-  // AI move (Regular mode only)
+  // AI move (Regular and 3D modes)
   useEffect(() => {
     if (
-      gameMode !== 'regular' ||
+      (gameMode !== 'regular' && gameMode !== '3d') ||
       state.status !== 'playing' ||
       aiPlayerId === null
     ) {
@@ -296,7 +296,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       : 500 + Math.random() * 1000
 
     const timer = setTimeout(() => {
-      const move = calculateAIMoveRegular(stateRef.current, aiDifficulty)
+      const move =
+        gameMode === '3d'
+          ? calculateAIMove3D(stateRef.current, aiDifficulty)
+          : calculateAIMoveRegular(stateRef.current, aiDifficulty)
       aiScheduledRef.current = false
       if (move !== null) {
         handleMakeMove(move)

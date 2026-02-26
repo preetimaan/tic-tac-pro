@@ -14,11 +14,7 @@ Classic 3×3 Tic-Tac-Toe with X and O pieces. Play against a friend or the compu
 - If all 9 cells are filled with no winner, it's a draw
 - Starting player is randomized each game
 
-**Human vs Computer (Regular only):**
-- Choose **Human vs Human** or **Human vs Computer**
-- When vs Computer: AI side (X or O) is chosen at random; select difficulty (Easy, Medium, Hard)
-- Easy: random valid moves. Medium: Minimax depth 3. Hard: full Minimax with alpha-beta
-- "AI is thinking..." shown on computer's turn; total games played is tracked and resets when you switch opponent type
+**Human vs Computer:** Same opponent/difficulty options as 3D (see below). Easy / Medium / Hard; Minimax depth 3 or 10.
 
 **Winning Lines:** 8 possible (3 rows, 3 columns, 2 diagonals)
 
@@ -26,7 +22,7 @@ Classic 3×3 Tic-Tac-Toe with X and O pieces. Play against a friend or the compu
 
 ### 3D Mode (Red & Blue)
 
-3×3×3 cube Tic-Tac-Toe with Red spheres and Blue cubes.
+3×3×3 cube Tic-Tac-Toe with Red spheres and Blue cubes. Play against a friend or the computer.
 
 **Rules:**
 - Players take turns placing pieces in a 3×3×3 cube (27 cells total)
@@ -37,6 +33,12 @@ Classic 3×3 Tic-Tac-Toe with X and O pieces. Play against a friend or the compu
   - 3D space diagonals through the cube
 - If all 27 cells are filled with no winner, it's a draw
 - Starting player is randomized each game
+
+**Human vs Computer (Regular & 3D):**
+- Choose **Human vs Human** or **Human vs Computer** (shown in Regular and 3D modes)
+- AI side (X/O or Red/Blue) is chosen at random; select difficulty (Easy, Medium, Hard)
+- Easy: random valid moves. Medium: Minimax limited depth. Hard: deeper Minimax with alpha-beta (3D uses depth 2/4 due to 27 cells)
+- "AI is thinking..." on computer's turn; total games played resets when you switch opponent type; win messages: "You Win!" / "Computer Wins!"
 
 **Winning Lines:** 37 possible
 - 24 within-layer wins (8 per layer × 3 layers)
@@ -112,7 +114,7 @@ npm run build
 ## Features
 
 - 🎮 Multiple game modes (Regular, 3D, Stacked)
-- 🤖 **Human vs Computer** in Regular mode (Easy / Medium / Hard AI, Minimax)
+- 🤖 **Human vs Computer** in Regular and 3D modes (Easy / Medium / Hard AI, Minimax)
 - ✨ Smooth animations and visual effects
 - 🎯 Win detection with highlighted winning line
 - 📊 Score tracking and total games played count
@@ -122,7 +124,7 @@ npm run build
 
 ## Future Enhancements
 
-- AI for 3D and Stacked modes
+- AI for Stacked mode
 - Sound effects
 - Particle effects on win
 - Online multiplayer
